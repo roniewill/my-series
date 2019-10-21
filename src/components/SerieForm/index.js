@@ -4,41 +4,41 @@ import { Collapse, Button, CardBody, Card } from 'reactstrap';
 import { FiPlus, FiMinus, FiSave } from 'react-icons/fi';
 import api from '../../services/api';
 
-const GenreForm = props => {
-  const { genreId, getGenders, setSuccess, setError, setMessage } = props;
+const SerieForm = props => {
+  const { serieId, getSeries, setSuccess, setError, setMessage } = props;
   const [collapse, setCollapse] = useState(false);
-  const [genre, setGenre] = useState('');
+  const [serie, setSerie] = useState('');
   const [buttonLabel, setButtonLabel] = useState('Salvar');
   const [id, setId] = useState(null);
 
   useEffect(() => {
-    if (genreId) {
-      setId(genreId);
-      editGenre(id);
+    if (serieId) {
+      setId(serieId);
+      editSerie(id);
       if (!collapse) setCollapse(!collapse);
     }
-  }, [genreId]);
+  }, [serieId]);
 
   const toggle = () => {
     setCollapse(!collapse);
     if (id) {
       setId(null);
       setButtonLabel('Salvar');
-      setGenre('');
+      setSerie('');
     }
   };
 
   // Save or Update Genre
   const handleSaveOrUpdate = e => {
     e.preventDefault();
-    if (!id && genre) {
+    if (!id && serie) {
       api
-        .post('genres', { name: genre })
+        .post('series', { name: serie })
         .then(res => {
           setSuccess(true);
-          setMessage('Cadastrado com sucesso!');
-          setGenre('');
-          getGenders();
+          setMessage('Serie cadastrada com sucesso!');
+          setSerie('');
+          getSeries();
         })
         .catch(error => {
           setError(true);
@@ -46,14 +46,14 @@ const GenreForm = props => {
         });
     }
 
-    if (id && genre) {
+    if (id && serie) {
       api
-        .put('genres/' + id, { name: genre })
+        .put('series/' + id, { name: serie })
         .then(res => {
           setSuccess(true);
-          setMessage(`Gênero #${id} atualizado com sucesso!`);
-          setGenre('');
-          getGenders();
+          setMessage(`Serie #${id} atualizada com sucesso!`);
+          setSerie('');
+          getSeries();
         })
         .catch(error => {
           setError(true);
@@ -62,15 +62,15 @@ const GenreForm = props => {
     }
   };
 
-  const editGenre = () => {
-    api.get('/genres/' + genreId).then(res => {
-      setGenre(res.data.name);
+  const editSerie = () => {
+    api.get('/series/' + serieId).then(res => {
+      setSerie(res.data.name);
       setButtonLabel('Atualizar');
     });
   };
 
   const handleChange = e => {
-    setGenre(e.target.value);
+    setSerie(e.target.value);
   };
 
   return (
@@ -82,7 +82,7 @@ const GenreForm = props => {
             onClick={toggle}
             style={{ marginBottom: '1rem' }}
             className="float-right"
-            title="Adiciona ou Atualiza um Gênero"
+            title="Adiciona ou Atualiza uma Serie"
           >
             {collapse === false ? <FiPlus /> : <FiMinus />}
           </Button>
@@ -94,17 +94,17 @@ const GenreForm = props => {
                 <form className="form-inline">
                   <input
                     type="text"
-                    name="genre"
+                    name="serie"
                     className="form-control mr-sm-2 col-md-9"
-                    placeholder="Nome do gênero"
-                    value={genre}
+                    placeholder="Nome da Serie"
+                    value={serie}
                     onChange={handleChange}
                   />
                   <button
                     className="btn btn-success my-2 my-sm-0"
                     type="submit"
                     onClick={handleSaveOrUpdate}
-                    disabled={genre === '' || genre.length < 4}
+                    disabled={serie === '' || serie.length < 4}
                   >
                     {buttonLabel} <FiSave />
                   </button>
@@ -118,4 +118,4 @@ const GenreForm = props => {
   );
 };
 
-export default GenreForm;
+export default SerieForm;

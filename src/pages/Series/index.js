@@ -2,56 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { FaTrash, FaRegEdit } from 'react-icons/fa';
 
 import api from '../../services/api';
-import GenreForm from '../../components/GenreForm';
+import SerieForm from '../../components/SerieForm';
 import { BoxLoading, AlertMessage } from '../../components/Utils';
 
-const Genres = props => {
-  const [genres, setGenres] = useState([]);
-  const [genreId, setGenreId] = useState(null);
+const Series = props => {
+  const [series, setSeries] = useState([]);
+  const [serieId, setSerieId] = useState(null);
 
   useEffect(() => {
-    getGenders();
+    getSeries();
   }, []);
 
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [message, setMessage] = useState('');
-  const [load, setLoad] = useState(false);
 
   useEffect(() => {
-    let timer = null;
     if (success) {
-      timer = setInterval(() => {
+      setInterval(() => {
         setSuccess(!success);
       }, 10000);
     }
 
     if (error) {
-      timer = setInterval(() => {
+      setInterval(() => {
         setError(!error);
       }, 10000);
     }
-
-    return () => {
-      if (timer) {
-        clearInterval(timer);
-      }
-    };
   }, [success, error]);
 
-  const getGenders = () => {
-    api.get('genres').then(res => {
-      setLoad(true);
-      setGenres(res.data.data);
-      setLoad(false);
+  const getSeries = () => {
+    api.get('series').then(res => {
+      setSeries(res.data.data);
     });
   };
 
-  const deleteGenre = id => {
+  const deleteSerie = id => {
     if (window.confirm('Deseja mesmo excluir esse registro?')) {
-      api.delete('genres/' + id).then(res => {
+      api.delete('series/' + id).then(res => {
         if (res.data.success) {
-          getGenders();
+          getSeries();
           setMessage('Gênero excluído com sucesso!');
           setSuccess(true);
         }
@@ -59,21 +49,21 @@ const Genres = props => {
     }
   };
 
-  const editGenre = id => {
-    setGenreId(id);
+  const editSerie = id => {
+    setSerieId(id);
   };
 
-  const renderRow = genre => {
+  const renderRow = serie => {
     return (
-      <tr key={genre.id}>
-        <th scope="row">{genre.id}</th>
-        <td>{genre.name}</td>
+      <tr key={serie.id}>
+        <th scope="row">{serie.id}</th>
+        <td>{serie.name}</td>
         <td className="w-25">
           <div className="btn-group" role="group" aria-label="Basic example">
             <button
               type="button"
               className="btn btn-warning"
-              onClick={() => editGenre(genre.id)}
+              onClick={() => editSerie(serie.id)}
               title="Editar"
             >
               <FaRegEdit />
@@ -81,7 +71,7 @@ const Genres = props => {
             <button
               type="button"
               className="btn btn-danger"
-              onClick={() => deleteGenre(genre.id)}
+              onClick={() => deleteSerie(serie.id)}
               title="Excluir"
             >
               <FaTrash />
@@ -94,19 +84,18 @@ const Genres = props => {
 
   return (
     <div className="container">
-      <h1 className="display-5 mt-3 mb-3">Gêneros</h1>
-      <GenreForm
-        genreId={genreId}
-        getGenders={getGenders}
+      <h1 className="display-5 mt-3 mb-3">Series</h1>
+      <SerieForm
+        serieId={serieId}
+        getSeries={getSeries}
         setSuccess={setSuccess}
         setError={setError}
         setMessage={setMessage}
       />
       {success && <AlertMessage color="success" message={message} />}
       {error && <AlertMessage color="danger" message={message} />}
-      {load && <BoxLoading message="Carregando..." />}
-      {genres.length === 0 ? (
-        <AlertMessage color="warning" message={'Nenhum registro encontrado'} />
+      {series.length === 0 ? (
+        <BoxLoading message="Carregando..." />
       ) : (
         <table className="table table-hover">
           <thead className="thead-dark">
@@ -116,11 +105,11 @@ const Genres = props => {
               <th scope="col">Ações</th>
             </tr>
           </thead>
-          <tbody>{genres.map(renderRow)}</tbody>
+          <tbody>{series.map(renderRow)}</tbody>
         </table>
       )}
     </div>
   );
 };
 
-export default Genres;
+export default Series;
