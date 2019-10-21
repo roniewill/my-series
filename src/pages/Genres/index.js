@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTrash, FaRegEdit } from 'react-icons/fa';
 
 import api from '../../services/api';
@@ -7,6 +7,7 @@ import { BoxLoading, AlertMessage } from '../../components/Utils';
 
 const Genres = props => {
   const [genres, setGenres] = useState([]);
+  const [genreId, setGenreId] = useState(null);
 
   useEffect(() => {
     getGenders();
@@ -48,6 +49,10 @@ const Genres = props => {
     }
   };
 
+  const editGenre = id => {
+    setGenreId(id);
+  };
+
   const renderRow = genre => {
     return (
       <tr key={genre.id}>
@@ -55,7 +60,12 @@ const Genres = props => {
         <td>{genre.name}</td>
         <td className="w-25">
           <div className="btn-group" role="group" aria-label="Basic example">
-            <button type="button" className="btn btn-secondary" title="Editar">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => editGenre(genre.id)}
+              title="Editar"
+            >
               <FaRegEdit />
             </button>
             <button
@@ -74,10 +84,16 @@ const Genres = props => {
 
   return (
     <div className="container">
-      <h1 className="display-5 mt-5 mb-3">Gêneros</h1>
+      <h1 className="display-5 mt-3 mb-3">Gêneros</h1>
+      <GenreForm
+        genreId={genreId}
+        getGenders={getGenders}
+        setSuccess={setSuccess}
+        setError={setError}
+        setMessage={setMessage}
+      />
       {success && <AlertMessage color="success" message={message} />}
       {error && <AlertMessage color="danger" message={message} />}
-      <GenreForm />
       {genres.length === 0 ? (
         <BoxLoading message="Carregando..." />
       ) : (

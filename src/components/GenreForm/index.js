@@ -1,25 +1,72 @@
-import React, { useState, Fragment } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 
 import { Collapse, Button, CardBody, Card } from 'reactstrap';
-import { FiPlusSquare, FiMinusSquare, FiSave } from 'react-icons/fi';
+import { FiPlus, FiMinus, FiSave } from 'react-icons/fi';
 import api from '../../services/api';
 
 const GenreForm = props => {
+  const { genreId, getGenders, setSuccess, setError, setMessage } = props;
   const [collapse, setCollapse] = useState(false);
   const [genre, setGenre] = useState('');
+  const [buttonLabel, setButtonLabel] = useState('Salvar');
+  const [id, setId] = useState(null);
 
-  const toggle = () => setCollapse(!collapse);
+  useEffect(() => {
+    if (genreId) {
+      setId(genreId);
+      editGenre(id);
+      if (!collapse) setCollapse(!collapse);
+    }
+  }, [genreId]);
 
-  const save = e => {
+  const toggle = () => {
+    setCollapse(!collapse);
+    if (id) {
+      setId(null);
+      setButtonLabel('Salvar');
+      setGenre('');
+    }
+  };
+
+  // Save or Update Genre
+  const handleSaveOrUpdate = e => {
     e.preventDefault();
-    if (genre !== null && genre !== '') {
+    if (!id && genre) {
       api
         .post('genres', { name: genre })
         .then(res => {
-          console.log('result data: ', res);
+          setSuccess(true);
+          setMessage('Cadastrado com sucesso!');
+          setGenre('');
+          getGenders();
         })
-        .catch(error => console.log('returned error: ', error));
+        .catch(error => {
+          setError(true);
+          setMessage(error);
+        });
     }
+
+    if (id && genre) {
+      api
+        .put('genres/' + id, { name: genre })
+        .then(res => {
+          setSuccess(true);
+          setMessage('Atualizado com sucesso!');
+          setGenre('');
+          getGenders();
+        })
+        .catch(error => {
+          setError(true);
+          setMessage(error);
+        });
+    }
+  };
+
+  const editGenre = () => {
+    api.get('/genres/' + genreId).then(res => {
+      setGenre(res.data.name);
+      setButtonLabel('Atualizar');
+    });
   };
 
   const handleChange = e => {
@@ -35,9 +82,9 @@ const GenreForm = props => {
             onClick={toggle}
             style={{ marginBottom: '1rem' }}
             className="float-right"
-            title="Novo Gênero"
+            title="Adiciona ou Atualiza um Gênero"
           >
-            {collapse === false ? <FiPlusSquare /> : <FiMinusSquare />}
+            {collapse === false ? <FiPlus /> : <FiMinus />}
           </Button>
         </div>
         <div className="col-12">
@@ -48,7 +95,7 @@ const GenreForm = props => {
                   <input
                     type="text"
                     name="genre"
-                    className="form-control mr-sm-2 col-md-10"
+                    className="form-control mr-sm-2 col-md-9"
                     placeholder="Nome do gênero"
                     value={genre}
                     onChange={handleChange}
@@ -56,10 +103,10 @@ const GenreForm = props => {
                   <button
                     className="btn btn-success my-2 my-sm-0"
                     type="submit"
-                    onClick={save}
+                    onClick={handleSaveOrUpdate}
                     disabled={genre === '' || genre.length < 4}
                   >
-                    <FiSave /> {` Salvar`}
+                    {buttonLabel} <FiSave />
                   </button>
                 </form>
               </CardBody>
